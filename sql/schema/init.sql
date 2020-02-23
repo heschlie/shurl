@@ -1,0 +1,6 @@
+CREATE TABLE shurls (
+  id BIGSERIAL PRIMARY KEY,
+  hash text NOT NULL,
+  url text NOT NULL,
+  hits BIGINT NOT NULL DEFAULT 0
+);
