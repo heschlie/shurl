@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
@@ -74,14 +75,16 @@ func shortened(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	s, err := dq.GetUrlFromHash(ctx, hash)
-	if err != nil {
-		log.WithError(err).Warn("Failed to locate hash")
+	if errors.Is(err, sql.ErrNoRows) {
+		log.WithError(err).Info("Failed to locate hash")
 		t := template.Must(template.ParseFiles("static/form.html"))
 		err := t.Execute(w, struct {NotFound bool}{true})
 		if err != nil {
 			http.Error(w, "Something broke", 500)
 		}
 		return
+	} else if err != nil {
+		log.WithError(err).Error("Something broke with postgres!")
 	}
 
 	err = dq.UpdateUrl(ctx, db.UpdateUrlParams{
