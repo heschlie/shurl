@@ -8,7 +8,7 @@ import (
 )
 
 const createUrl = `-- name: CreateUrl :one
-INSERT INTO shurls (hash, url) VALUES ($1, $2) RETURNING id, hash, url, hits
+INSERT INTO shurls (hash, url) VALUES ($1, $2) RETURNING id, hash, url, hits, expire
 `
 
 type CreateUrlParams struct {
@@ -24,12 +24,13 @@ func (q *Queries) CreateUrl(ctx context.Context, arg CreateUrlParams) (Shurl, er
 		&i.Hash,
 		&i.Url,
 		&i.Hits,
+		&i.Expire,
 	)
 	return i, err
 }
 
 const getUrl = `-- name: GetUrl :one
-SELECT id, hash, url, hits FROM shurls WHERE id = $1 LIMIT 1
+SELECT id, hash, url, hits, expire FROM shurls WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUrl(ctx context.Context, id int64) (Shurl, error) {
@@ -40,12 +41,13 @@ func (q *Queries) GetUrl(ctx context.Context, id int64) (Shurl, error) {
 		&i.Hash,
 		&i.Url,
 		&i.Hits,
+		&i.Expire,
 	)
 	return i, err
 }
 
 const getUrlFromHash = `-- name: GetUrlFromHash :one
-SELECT id, hash, url, hits FROM shurls WHERE hash = $1 LIMIT 1
+SELECT id, hash, url, hits, expire FROM shurls WHERE hash = $1 LIMIT 1
 `
 
 func (q *Queries) GetUrlFromHash(ctx context.Context, hash string) (Shurl, error) {
@@ -56,6 +58,7 @@ func (q *Queries) GetUrlFromHash(ctx context.Context, hash string) (Shurl, error
 		&i.Hash,
 		&i.Url,
 		&i.Hits,
+		&i.Expire,
 	)
 	return i, err
 }

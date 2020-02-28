@@ -5,8 +5,9 @@ package db
 import ()
 
 type Shurl struct {
-	ID   int64  `json:"id"`
-	Hash string `json:"hash"`
-	Url  string `json:"url"`
-	Hits int64  `json:"hits"`
+	ID     int64  `json:"id"`
+	Hash   string `json:"hash"`
+	Url    string `json:"url"`
+	Hits   int64  `json:"hits"`
+	Expire int64  `json:"expire"`
 }
