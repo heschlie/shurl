@@ -5,6 +5,7 @@ start-postgres: stop-postgres
 	    -e POSTGRES_PASSWORD=micron \
 	    -e POSTGRES_DB=shurl \
 	    -p 5432:5432 \
+	    -v $(pwd)/sql/schema:/docker-entrypoint-initdb.d \
 	    -d postgres
 
 .PHONY: stop-postgres
