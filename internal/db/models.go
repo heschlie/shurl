@@ -2,12 +2,20 @@
 
 package db
 
-import ()
+import (
+	"database/sql"
+)
 
 type Shurl struct {
-	ID     int64  `json:"id"`
-	Hash   string `json:"hash"`
-	Url    string `json:"url"`
-	Hits   int64  `json:"hits"`
-	Expire int64  `json:"expire"`
+	ID     int64         `json:"id"`
+	Hash   string        `json:"hash"`
+	Url    string        `json:"url"`
+	Owner  sql.NullInt64 `json:"owner"`
+	Hits   int64         `json:"hits"`
+	Expire int64         `json:"expire"`
+}
+
+type User struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
 }

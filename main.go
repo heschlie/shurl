@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"html/template"
 	"net/http"
 	"shurl/internal/db"
@@ -18,13 +19,15 @@ import (
 var dq = &db.Queries{}
 
 func main() {
+	viper.SetConfigName("shurl")
+
 	host := "localhost"
 	port := 5432
 	user := "shurl"
 	pass := "micron"
 	dbname := "shurl"
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-							host, port, user, pass, dbname)
+		host, port, user, pass, dbname)
 	database, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		log.WithError(err).Fatalf("Failed to connect to DB %s", host)
@@ -40,8 +43,8 @@ func main() {
 
 func home(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseFiles("static/form.html"))
-    if r.Method != http.MethodPost {
-    	err := t.Execute(w, nil)
+	if r.Method != http.MethodPost {
+		err := t.Execute(w, nil)
 		if err != nil {
 			http.Error(w, "There was an issue", 500)
 		}
@@ -78,7 +81,7 @@ func shortened(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, sql.ErrNoRows) {
 		log.WithError(err).Info("Failed to locate hash")
 		t := template.Must(template.ParseFiles("static/form.html"))
-		err := t.Execute(w, struct {NotFound bool}{true})
+		err := t.Execute(w, struct{ NotFound bool }{true})
 		if err != nil {
 			http.Error(w, "Something broke", 500)
 		}
@@ -92,7 +95,7 @@ func shortened(w http.ResponseWriter, r *http.Request) {
 		Hits: s.Hits + 1,
 	})
 	if err != nil {
-		log.WithError(err).Warnf("Failed to update shurl hits for %s", s.ID)
+		log.WithError(err).Warnf("Failed to update shurl hits for %d", s.ID)
 	}
 	http.Redirect(w, r, s.Url, 301)
 }

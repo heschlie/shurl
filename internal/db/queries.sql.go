@@ -5,24 +5,27 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUrl = `-- name: CreateUrl :one
-INSERT INTO shurls (hash, url) VALUES ($1, $2) RETURNING id, hash, url, hits, expire
+INSERT INTO shurls (hash, url, owner) VALUES ($1, $2, $3) RETURNING id, hash, url, owner, hits, expire
 `
 
 type CreateUrlParams struct {
-	Hash string `json:"hash"`
-	Url  string `json:"url"`
+	Hash  string        `json:"hash"`
+	Url   string        `json:"url"`
+	Owner sql.NullInt64 `json:"owner"`
 }
 
 func (q *Queries) CreateUrl(ctx context.Context, arg CreateUrlParams) (Shurl, error) {
-	row := q.db.QueryRowContext(ctx, createUrl, arg.Hash, arg.Url)
+	row := q.db.QueryRowContext(ctx, createUrl, arg.Hash, arg.Url, arg.Owner)
 	var i Shurl
 	err := row.Scan(
 		&i.ID,
 		&i.Hash,
 		&i.Url,
+		&i.Owner,
 		&i.Hits,
 		&i.Expire,
 	)
@@ -30,7 +33,7 @@ func (q *Queries) CreateUrl(ctx context.Context, arg CreateUrlParams) (Shurl, er
 }
 
 const getUrl = `-- name: GetUrl :one
-SELECT id, hash, url, hits, expire FROM shurls WHERE id = $1 LIMIT 1
+SELECT id, hash, url, owner, hits, expire FROM shurls WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetUrl(ctx context.Context, id int64) (Shurl, error) {
@@ -40,6 +43,7 @@ func (q *Queries) GetUrl(ctx context.Context, id int64) (Shurl, error) {
 		&i.ID,
 		&i.Hash,
 		&i.Url,
+		&i.Owner,
 		&i.Hits,
 		&i.Expire,
 	)
@@ -47,7 +51,7 @@ func (q *Queries) GetUrl(ctx context.Context, id int64) (Shurl, error) {
 }
 
 const getUrlFromHash = `-- name: GetUrlFromHash :one
-SELECT id, hash, url, hits, expire FROM shurls WHERE hash = $1 LIMIT 1
+SELECT id, hash, url, owner, hits, expire FROM shurls WHERE hash = $1 LIMIT 1
 `
 
 func (q *Queries) GetUrlFromHash(ctx context.Context, hash string) (Shurl, error) {
@@ -57,6 +61,7 @@ func (q *Queries) GetUrlFromHash(ctx context.Context, hash string) (Shurl, error
 		&i.ID,
 		&i.Hash,
 		&i.Url,
+		&i.Owner,
 		&i.Hits,
 		&i.Expire,
 	)
